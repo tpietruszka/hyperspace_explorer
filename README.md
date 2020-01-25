@@ -48,9 +48,11 @@ It should be possible to:
   with default values matching previous behaviour. Replacing pieces of logic with different ones, with different 
   hyper-parameters should be handled as well.
 - queue runs from a notebook (e.g. generate a grid of HPs in some dimensions) and have them
-  executed by worker processes (possibly distributed among multiple machines),
+  executed by worker processes (possibly distributed among multiple machines). Then close the notebook, or 
+  add some more runs, never again waiting for computations to finish.
 - install core parts of the project's package and use it in production code (if the code got ugly with too many
   options, write a new version of it, and compare results with the old version, all in the same environment)
+- **use automatic hyper-parameter tuning algorithms**, informed by all past experiments during development. 
 
 #### Installation
 TODO
