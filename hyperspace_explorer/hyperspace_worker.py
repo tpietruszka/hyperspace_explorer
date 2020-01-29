@@ -4,6 +4,7 @@ import time
 import argparse
 import sys
 import copy
+import json
 from sacred import observers, Experiment
 from hyperspace_explorer.queue import RunQueue, QueuedRun
 
@@ -29,12 +30,19 @@ def single_run(to_run: QueuedRun, observer: observers.RunObserver):
     ex = Experiment(to_run.task_name, interactive=True)
     ex.observers.append(observer)
     ex.add_config(to_run.params)
-    ex.add_config(str(to_run.task_description_file))
+    task_desc = json.load(to_run.task_description_file.open())
+    if 'seed' in task_desc.keys():  # needs to be set before run to make sense with sacred
+        ex.add_config({'seed': task_desc['seed']})
 
     @ex.main
     def ex_main(_config, _run):
-        scenario = scenarios.Scenario.from_config(_config['scenario'])
-        res = scenario.single_run(_config)
+        #  task desc should always stay effectively the same, but logging as resource just in case
+        task = json.load(ex.open_resource(to_run.task_description_file, 'r'))
+        if 'seed' in task.keys():  # already set when setting config
+            del task['seed']
+        all_params = dict(**_config, **task)
+        scenario = scenarios.Scenario.from_config(task['scenario'])
+        res = scenario.single_run(all_params)
         _run.info = res[1]
         return res[0]
 
