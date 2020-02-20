@@ -54,7 +54,76 @@ It should be possible to:
   options, write a new version of it, and compare results with the old version, all in the same environment)
 - **use automatic hyper-parameter tuning algorithms**, informed by all past experiments during development. 
 
-#### Installation
+#### Glossary
 TODO
+
+#### Installation
+Install with pip, as a normal python package.
+
+Other than all the modules being made available for import, it will also make `hyperspace_worker.py` 
+available in your system's PATH (or a specific virtual environment).
+
+To use most of this package's functions a running instance of MongoDB will be needed.
+
 #### Usage
+##### Running a worker
+Run a command `hyperspace_worker.py [path to tasks dir] [mongo db name]`.
+
+**Important:** it has to be ran from a directory containing a `scenarios.py` module, which defines 
+experiment scenarios allowed to be ran within the given project. The `hyperspace_worker.py` file 
+should not be present in the folder.
+
+Arguments:
+
+- `path to tasks dir` - path to a directory containing `.json` files, describing each allowed `task` -
+a parameterization of a `scenario`
+- `mongo db name` - name of the mongoDB database to store results in
+- optional params: mongoDB URI (if not localhost, or if password is required), interval to query for new tasks
+
+
+##### Structuring a project
+TODO
+##### Possible access points
+###### CLI
+TODO
+###### Task queue + workers
+Start workers on 1 or more nodes, set them up to use the same database (which is also the task queue).
+Workers are specific to one project - will only process tasks for the project they were started for.
+
+Example code, usually ran from a notebook, to submit one task. From here, it is easy to e.g. submit a grid
+of hyper-parameters for the workers to test.
+
+```python
+from hyperspace_explorer.queue import RunQueue
+from pathlib import Path
+
+tasks_dir = Path.cwd().resolve().parent / 'tasks'  # just an example - relative to the notebook
+db_name = 'ulmfit_attention'
+mongo_uri = 'localhost:27017'
+
+q = RunQueue(mongo_uri, db_name, tasks_dir)
+task_name = 'imdb_1k_sample_single'
+
+conf = {
+    'aggregation': {  # different additional parameters are available depending on `className`
+        'className': 'BranchingAttentionAggregation',
+        'agg_layers': [50, 10]
+    },
+    'classifier': { # this dict is passed to a specific function within a scenario, but polymorphism is not needed
+        'lin_ftrs': [],
+        'drop_mult': 0.5,
+    },
+    'training_schedule': { # even if we do not want to change any default parameters, className is required
+        'className': 'DefaultSchedule',
+    }
+}
+q.submit(task_name, conf)
+
+```
+The code above works with the project: https://github.com/tpietruszka/ulmfit_attention. 
+In this case workers should be ran from within the inner `ulmfit_attention` directory.
+
+###### Interactive prototyping in Jupyter
+TODO 
+###### Running tests
 TODO
