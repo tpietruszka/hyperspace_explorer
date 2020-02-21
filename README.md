@@ -80,6 +80,14 @@ a parameterization of a `scenario`
 - `mongo db name` - name of the mongoDB database to store results in
 - optional params: mongoDB URI (if not localhost, or if password is required), interval to query for new tasks
 
+##### Browsing experiment results
+
+This project (ab)uses [Sacred](https://github.com/IDSIA/sacred) to collect and store information about each run.
+
+One of the benefits: we can use one of many ready-made dashboards for Sacred,
+e.g.  [Omniboard](https://github.com/vivekratnavel/omniboard) - highly recommended, works out of the box, 
+many impressive features. 
+
 
 ##### Structuring a project
 TODO
