@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod, ABC
 from typing import *
-from copy import deepcopy
+from copy import copy, deepcopy
 import dataclasses
 
 factories = {}
@@ -67,12 +67,13 @@ class Configurable(ABC):
         return cls.factory(cname, full)
 
 
-def dataclass_defaults_to_dict(cls: type) -> Dict:
-    """Takes a dataclass-decorated class (not instance), returns a dict of default values"""
-    res = {}
-    for f in dataclasses.fields(cls):
-        if not isinstance(f.default, dataclasses._MISSING_TYPE):
-            res[f.name] = f.default
-        if not isinstance(f.default_factory, dataclasses._MISSING_TYPE):
-            res[f.name] = f.default_factory()
-    return res
+class ConfigurableDataclass(Configurable):
+    @classmethod
+    def get_default_config(cls) -> Dict:
+        res = {}
+        for f in dataclasses.fields(cls):
+            if not isinstance(f.default, dataclasses._MISSING_TYPE):
+                res[f.name] = f.default
+            if not isinstance(f.default_factory, dataclasses._MISSING_TYPE):
+                res[f.name] = f.default_factory()
+        return res
