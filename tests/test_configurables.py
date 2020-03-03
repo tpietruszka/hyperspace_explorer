@@ -1,5 +1,5 @@
 """
-Toy problem to explore ~all possible options regarding default values, compositions, etc
+Toy problem to explore possible options regarding default values, compositions, etc
 
 In typical usage, we would have factory classes such as:
 - Dataset, and children: DatasetA, DatasetB, ...
@@ -15,14 +15,67 @@ Warning: in dataclasses, do not add default values to fields of parent classes -
 children will be required to only have default-value fields. This is a limitation of dataclasses
 themselves.
 """
-
-from hyperspace_explorer.configurables import *
 from dataclasses import dataclass
+from abc import abstractmethod
+from typing import *
+from hyperspace_explorer.configurables import Configurable, ConfigurableDataclass, RegisteredAbstractMeta, factories, \
+    fill_in_defaults
+
+
+class Vehicle(Configurable, metaclass=RegisteredAbstractMeta, is_registry=True):
+    @abstractmethod
+    def get_mpge(self) -> float:
+        pass
+
+
+class Car(Vehicle):
+    def __init__(self, Engine: Dict, num_doors: int):
+        """
+        Typical Configurable, contains both parameters of simple types and other Configurables.
+        For Configurable components, we can create instances right away, or when needed
+        (see Truck.get_mpge).
+
+        No default values in init! put them in get_default_config, not all have to be specified.
+         """
+        self.engine = factories['Engine'].from_config(Engine)
+        self.num_doors = num_doors
+
+    @classmethod
+    def get_default_config(cls) -> Dict:
+        return {
+            'num_doors': 4
+        }
+
+    def get_mpge(self) -> float:
+        return self.engine.get_efficiency() * 100
+
+
+class Truck(Vehicle):
+    def __init__(self, Engine: Dict, Trailer: Dict):
+        """
+        By convention, like in dataclasses, original values are stored in fields with names
+        equal to param names. Instances of configurables - the same name, but lowercase.
+        """
+        self.engine = factories['Engine'].from_config(Engine)
+        self.Trailer = Trailer
+
+    @classmethod
+    def get_default_config(cls) -> Dict:
+        return {
+            'Trailer': {
+                'className': 'ContainerTrailer'
+            }
+        }
+
+    def get_mpge(self) -> float:
+        trailer = Trailer.from_config(self.Trailer)
+        base = 10 - trailer.get_drag()
+        return base * self.engine.get_efficiency()
 
 
 class Engine(Configurable, metaclass=RegisteredAbstractMeta, is_registry=True):
     @abstractmethod
-    def get_efficiency(self):
+    def get_efficiency(self) -> float:
         pass
 
 
@@ -31,13 +84,11 @@ class ElectricMotor(Engine):
     def get_default_config(cls) -> Dict:
         return {}
 
-    def get_efficiency(self):
+    def get_efficiency(self) -> float:
         return .9
 
 
 class CombustionEngine(Engine):
-    """No default values in init! put them in get_default_config, not all have to be specified"""
-
     def __init__(self, displacement_liters: float, strokes_per_cycle: int):
         self.displacement_liters = displacement_liters
         self.strokes_per_cycle = strokes_per_cycle
@@ -48,43 +99,13 @@ class CombustionEngine(Engine):
             'strokes_per_cycle': 4
         }
 
-    def get_efficiency(self):
-        return self.strokes_per_cycle / 10 - self.displacement_liters / 10
-
-
-@dataclass
-class Vehicle(ConfigurableDataclass, metaclass=RegisteredAbstractMeta, is_registry=True):
-    """If no custom constructor is necessary, it is easier to use a dataclass"""
-
-    # TODO: change to normal class, construct engine in init, Trailer can be a dataclass example
-    @abstractmethod
-    def get_mpge(self) -> float:
-        pass
-
-
-@dataclass
-class Car(Vehicle):
-    Engine: Dict  # corresponds to a config, we have to explicitly create the object somewhere in our code
-    num_doors: int = 4
-
-    def get_mpge(self) -> float:
-        eng = Engine.from_config(self.Engine)
-        return eng.get_efficiency() * 100
-
-
-@dataclass
-class Truck(Vehicle):
-    Engine: Dict
-    Trailer: Dict = dataclasses.field(default_factory=lambda: ({"className": "ContainerTrailer"}))
-
-    def get_mpge(self) -> float:
-        eng = Engine.from_config(self.Engine)
-        base = 10  # TODO: include trailer
-        return base * eng.get_efficiency()
+    def get_efficiency(self) -> float:
+        return self.strokes_per_cycle / 10 - self.displacement_liters / 50
 
 
 @dataclass
 class Trailer(ConfigurableDataclass, metaclass=RegisteredAbstractMeta, is_registry=True):
+    """If no custom constructor is necessary, it is easier to use a dataclass"""
     @abstractmethod
     def get_drag(self) -> float:
         pass
@@ -107,7 +128,6 @@ car1 = {
     }
 }
 car1full = {'Vehicle': car1}
-
 
 car2 = {
     'className': 'Car',
@@ -136,6 +156,17 @@ truck2 = {
         'length': 5.
     }
 }
+
+
+def test_construction():
+    c1 = Car.from_config(car1)
+    assert c1.get_mpge() is not None
+    c2 = Car.from_config(car2)
+    assert c2.get_mpge() is not None
+    t1 = Car.from_config(truck1)
+    assert t1.get_mpge() is not None
+    t2 = Car.from_config(truck2)
+    assert t2.get_mpge() is not None
 
 
 def test_fill_in_defaults():
