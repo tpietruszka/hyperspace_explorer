@@ -100,3 +100,31 @@ def fill_in_defaults(params: Dict, factory_name: Optional[str] = None) -> Dict:
             params[k] = fill_in_defaults(v, k)
         # TODO: should we handle lists of Configurables? for now ignoring lists altogether
     return params
+
+
+def update_config(c1: Dict, c2: Dict) -> Dict:
+    """
+    Update values of c1 config with c2. To reiterate: c2 overrides c1.
+
+    c1 should be a valid config - if specifying some component, className has to be specified
+    specifying className in c2 is only necessary if changing component class, then it causes
+    the whole config subtree to be replaced (old parameters might not make sense for the new,
+    different class)
+
+    :param c1: source config
+    :param c2: updates to the config
+    :return: Dict, modified copy of c1
+    """
+    c1 = deepcopy(c1)
+    for k, v in c2.items():
+        if isinstance(v, Dict):  # another Configurable config
+            if k not in c1.keys():
+                c1[k] = v
+            else:
+                if CLASS_NAME_FIELD not in v.keys() or c1[k][CLASS_NAME_FIELD] == v[CLASS_NAME_FIELD]:
+                    c1[k] = update_config(c1[k], v)
+                else:  # c2 sets a different subclass - replacing the config completely
+                    c1[k] = v
+        else:  # normal value
+            c1[k] = v
+    return c1

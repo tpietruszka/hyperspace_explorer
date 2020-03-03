@@ -19,7 +19,7 @@ from dataclasses import dataclass
 from abc import abstractmethod
 from typing import *
 from hyperspace_explorer.configurables import Configurable, ConfigurableDataclass, RegisteredAbstractMeta, factories, \
-    fill_in_defaults
+    fill_in_defaults, update_config
 
 
 class Vehicle(Configurable, metaclass=RegisteredAbstractMeta, is_registry=True):
@@ -189,3 +189,35 @@ def test_fill_in_defaults():
     truck2_filled = fill_in_defaults(truck2, 'Vehicle')
     assert truck2_filled['Trailer']['height'] == 3
     assert truck2_filled['Trailer']['length'] == 5
+
+
+def test_update_config():
+    c1u = {'num_doors': 2, 'Engine': {'displacement_liters': 3.}}
+    c1 = update_config(car1, c1u)
+    assert c1['num_doors'] == 2
+    assert c1['Engine']['displacement_liters'] == 3.
+
+    c2u = {'num_doors': 2, 'Engine': {'displacement_liters': 3.}}
+    c2 = update_config(car2, c2u)
+    assert c2['num_doors'] == 2
+    assert c2['Engine']['strokes_per_cycle'] == 2
+
+    c2u2 = {'num_doors': 2, 'Engine': {'className': 'CombustionEngine', 'displacement_liters': 3.}}
+    c22 = update_config(car2, c2u2)
+    assert c22['num_doors'] == 2
+    assert c22['Engine']['strokes_per_cycle'] == 2
+
+    t1u = {'Trailer': {'className': 'ContainerTrailer', 'length': 20}}
+    t1 = update_config(truck1, t1u)
+    assert t1['Trailer']['className'] == 'ContainerTrailer'
+    assert t1['Trailer']['length'] == 20
+
+
+def test_update_config_change_class():
+    c1_to_electric = {'Engine': {'className': 'ElectricMotor'}}
+    c1 = update_config(car1, c1_to_electric)
+    assert c1['Engine'] == {'className': 'ElectricMotor'}
+
+    t1_to_combustion = {'Engine': {'className': 'CombustionEngine', 'displacement_liters': 1.5}}
+    t1 = update_config(truck1, t1_to_combustion)
+    assert t1['Engine'] == {'className': 'CombustionEngine', 'displacement_liters': 1.5}
