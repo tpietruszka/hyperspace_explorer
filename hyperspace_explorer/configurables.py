@@ -4,6 +4,7 @@ from copy import copy, deepcopy
 import dataclasses
 
 factories = {}
+CLASS_NAME_FIELD = 'className'
 
 
 class RegisteredAbstractMeta(ABCMeta):
@@ -44,7 +45,7 @@ class Configurable(ABC):
     Ensures that mappings of default values are provided in a consistent way and enables easy construction from
     a partial config
     """
-    classNameField = 'className'
+
 
     @classmethod
     @abstractmethod
@@ -59,14 +60,15 @@ class Configurable(ABC):
     @classmethod
     def from_config(cls, params) -> 'Configurable':
         params = deepcopy(params)
-        cname = params[cls.classNameField]
-        del params[cls.classNameField]
+        cname = params[CLASS_NAME_FIELD]
+        del params[CLASS_NAME_FIELD]
 
         full = cls.subclass_registry[cname].get_default_config()
         full.update(params)
         return cls.factory(cname, full)
 
 
+@dataclasses.dataclass
 class ConfigurableDataclass(Configurable):
     @classmethod
     def get_default_config(cls) -> Dict:
@@ -77,3 +79,24 @@ class ConfigurableDataclass(Configurable):
             if not isinstance(f.default_factory, dataclasses._MISSING_TYPE):
                 res[f.name] = f.default_factory()
         return res
+
+
+def fill_in_defaults(params: Dict, factory_name: Optional[str] = None) -> Dict:
+    """
+    Given a config dictionary, return a copy with filled in defaults.
+    Recursive; if passing a full config (without `className` at top level,
+    do not pass `factory_name`.
+    """
+    params = params.copy()
+    if CLASS_NAME_FIELD in params.keys():
+        cn = params[CLASS_NAME_FIELD]
+        defaults = factories[factory_name].subclass_registry[cn].get_default_config()
+        for k, v in defaults.items():
+            if k not in params.keys():
+                params[k] = v
+                print(f'Setting {k}={v}')
+    for k, v in params.items():
+        if isinstance(v, Dict) and CLASS_NAME_FIELD in v.keys():
+            params[k] = fill_in_defaults(v, k)
+        # TODO: should we handle lists of Configurables? for now ignoring lists altogether
+    return params

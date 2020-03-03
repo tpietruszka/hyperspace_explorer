@@ -27,12 +27,13 @@ def process_queue(tasks_dir: Path, db_name: str, mongo_uri: str, sleep_time: int
 
 
 def single_run(to_run: QueuedRun, observer: observers.RunObserver):
+    params = to_run.params
     ex = Experiment(to_run.task_name, interactive=True)
     ex.observers.append(observer)
     ex.add_config(to_run.params)
-    task_desc = json.load(to_run.task_description_file.open())
-    if 'seed' in task_desc.keys():  # needs to be set before run to make sense with sacred
-        ex.add_config({'seed': task_desc['seed']})
+    task_rnd_seed = json.load(to_run.task_description_file.open()).get('seed', None)
+    if task_rnd_seed is not None:  # needs to be set before run to make sense with sacred
+        ex.add_config({'seed': task_rnd_seed})
 
     @ex.main
     def ex_main(_config, _run):
@@ -41,7 +42,7 @@ def single_run(to_run: QueuedRun, observer: observers.RunObserver):
         if 'seed' in task.keys():  # already set when setting config
             del task['seed']
         all_params = dict(**_config, **task)
-        scenario = scenarios.Scenario.from_config(task['scenario'])
+        scenario = scenarios.Scenario.from_config(task['Scenario'])
         res = scenario.single_run(all_params)
         _run.info = res[1]
         return res[0]

@@ -14,5 +14,8 @@ class Scenario(Configurable, metaclass=RegisteredAbstractMeta, is_registry=True)
         return {}
 
     def __init__(self, **kwargs):
-        """Allows for parameters to be passed, but used directly by components"""
+        """
+        Allows construction with extra parameters, by `.from_config()`,
+        but parameters are then used in `single_run()`
+        """
         pass
