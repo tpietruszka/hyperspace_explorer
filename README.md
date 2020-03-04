@@ -1,6 +1,6 @@
 # Hyperspace explorer
-Collection of tools meant to enable faster progress and reproducibility of results in ML/DL projects and competitions,
-without assuming too much about the projects themselves and used tools. 
+Collection of tools meant to enable faster progress and reproducibility of results in ML/DL 
+projects and competitions, without assuming too much about the projects themselves and used tools. 
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
@@ -76,7 +76,21 @@ It should be possible to:
 - **use automatic hyper-parameter tuning algorithms**, informed by all past experiments during development. 
 
 ### Glossary
-TODO
+- `Run` - single execution of a `Task` with a specific config (set of parameters), concluded by calculation
+of a quality metric (one or more). \
+Example: training a classifier with the hyper-parameters provided in the config, calculating AUROC/accuracy/...
+on the validation set. \
+Each run gets its entry - including parameters, code versions, result metrics, additional meta-information -\
+in the MongoDB database, `runs` collection.
+- `Task` - fully specified problem to solve, and then compare different solutions to. \
+Consists of a chosen 
+`Scenario` and some parameters passed to it - e.g. which dataset to use, how big a sample of a training set
+to use, etc. Each task should be specified as a .json file.
+- `Scenario` - template of a `Task` without its parameters. When parameterized by `Task` parameters
+and a `Run` config it can be executed, and should return a quality metric. Each `Scenario` is a class,
+inheriting from `scenario_base.Scenario`. Its `.single_run()` method typically contains dataset construction, 
+model construction, model training and evaluation.
+    
 
 ## Setup
 ### Installation
