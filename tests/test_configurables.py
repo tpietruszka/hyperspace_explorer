@@ -55,6 +55,10 @@ class Truck(Vehicle):
         """
         By convention, like in dataclasses, original values are stored in fields with names
         equal to param names. Instances of configurables - the same name, but lowercase.
+
+        In a normal case, with code separated into modules, instead of
+        `factories['Engine']` we would use something like `engines.Engine`.
+        (after importing the `engines` module)
         """
         self.engine = factories['Engine'].from_config(Engine)
         self.Trailer = Trailer

@@ -13,6 +13,7 @@ projects and competitions, without assuming too much about the projects themselv
 - [Setup](#setup)
   - [Installation](#installation)
   - [Project structure](#project-structure)
+    - [Adding new parameters, default values](#adding-new-parameters-default-values)
 - [Usage](#usage)
   - [Running a worker](#running-a-worker)
   - [Browsing experiment results](#browsing-experiment-results)
@@ -89,7 +90,11 @@ Each task should be specified as a .json file.
 and a `Run` config it can be executed, and should return a quality metric. Each `Scenario` is a class,
 inheriting from `scenario_base.Scenario`. Its `.single_run()` method typically contains dataset construction, 
 model construction, model training and evaluation.
-    
+- `Study` - a project in which we define one or more `Scenarios` to study
+solutions for, with a shared codebase, database, and virtual environment.
+Corresponds to a Python package, which has a dependency on `hyperspace_explorer`
+and includes a `scenarios` module.
+
 
 ## Setup
 ### Installation
@@ -102,6 +107,25 @@ To use most of this package's functions a running instance of MongoDB will be ne
 
 ### Project structure
 TODO
+
+#### Adding new parameters, default values
+As we add new parameters to our code (our classes), we must provide default
+values that ensure behaviour consistent with the earlier versions of the code.
+
+To achieve that, default values (they do not have to be optimal/recommended
+ones!) live inside the classes. They must not be set in function  - instead,
+they should be provided by the `.get_default_values()` method of each
+`Configurable`. If using dataclasses, that method is provided automatically.
+
+When a worker process starts to process a Run, it fills in all default values
+- they end up stored in the database. It is redundant, but makes result analysis
+much easier - they do not have to be aware of the Study-specific codebase.
+
+If expanding a Scenario to fit more Tasks, and adding parameters to it,
+similarly default values should be provided for all of them.
+
+A tool for back-filling new default values to past runs (while keeping original
+config in a different field as backup?) would be useful - future development.
 
 ## Usage
 ### Running a worker
@@ -131,11 +155,12 @@ many impressive features.
 ### CLI
 TODO
 ### Run queue + workers
-Start workers on 1 or more nodes, set them up to use the same database (which is also the task queue).
-Workers are specific to one project - will only process tasks for the project they were started for.
+Start workers on 1 or more nodes, set them up to use the same database (which
+also serves as a task queue). Workers are specific to one Study (project) -
+will only process tasks for the Study they were started for.
 
-Example code, usually ran from a notebook, to submit one task. From here, it is easy to e.g. submit a grid
-of hyper-parameters for the workers to test.
+Example code, usually ran from a notebook, to submit one task. From here, it is
+easy to e.g. submit a grid of hyper-parameters for the workers to test.
 
 ```python
 from hyperspace_explorer.queue import RunQueue
