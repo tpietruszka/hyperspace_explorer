@@ -1,10 +1,31 @@
-### Hyperspace explorer
-
-#### In short:
+# Hyperspace explorer
 Collection of tools meant to enable faster progress and reproducibility of results in ML/DL projects and competitions,
 without assuming too much about the projects themselves and used tools. 
 
-#### What is it useful for?
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+
+- [Introduction](#introduction)
+  - [What is it useful for?](#what-is-it-useful-for)
+  - [Goals](#goals)
+  - [Glossary](#glossary)
+- [Setup](#setup)
+  - [Installation](#installation)
+  - [Project structure](#project-structure)
+- [Usage](#usage)
+  - [Running a worker](#running-a-worker)
+  - [Browsing experiment results](#browsing-experiment-results)
+- [Possible access points, usage modes](#possible-access-points-usage-modes)
+  - [CLI](#cli)
+  - [Run queue + workers](#run-queue--workers)
+  - [Interactive prototyping in Jupyter](#interactive-prototyping-in-jupyter)
+  - [Running tests](#running-tests)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+## Introduction
+### What is it useful for?
 Meant to support a process where we have:
 - a dataset, possibly pre-processed to some degree, that can be deterministically loaded (multiple versions of data? 
 loading code should take an argument specifying which version to load)
@@ -38,7 +59,7 @@ The strength of the package lies in its modularity, minimal assumptions about wh
 and how you need to do it. It is meant to get out of your way - your code should still work without it, 
 ran the way you need - be it CLI, a notebook, etc.
 
-#### Goals
+### Goals
 It should be possible to:
 - store and analyze results of all past experiments,
 - reproduce past results (-> store results together with hyper-parameters, data, versions of code, ...),
@@ -54,10 +75,11 @@ It should be possible to:
   options, write a new version of it, and compare results with the old version, all in the same environment)
 - **use automatic hyper-parameter tuning algorithms**, informed by all past experiments during development. 
 
-#### Glossary
+### Glossary
 TODO
 
-#### Installation
+## Setup
+### Installation
 Install with pip, as a normal python package.
 
 Other than all the modules being made available for import, it will also make `hyperspace_worker.py` 
@@ -65,8 +87,11 @@ available in your system's PATH (or a specific virtual environment).
 
 To use most of this package's functions a running instance of MongoDB will be needed.
 
-#### Usage
-##### Running a worker
+### Project structure
+TODO
+
+## Usage
+### Running a worker
 Run a command `hyperspace_worker.py [path to tasks dir] [mongo db name]`.
 
 **Important:** it has to be ran from a directory containing a `scenarios.py` module, which defines 
@@ -80,21 +105,19 @@ a parameterization of a `scenario`
 - `mongo db name` - name of the mongoDB database to store results in
 - optional params: mongoDB URI (if not localhost, or if password is required), interval to query for new tasks
 
-##### Browsing experiment results
+### Browsing experiment results
 
 This project (ab)uses [Sacred](https://github.com/IDSIA/sacred) to collect and store information about each run.
 
-One of the benefits: we can use one of many ready-made dashboards for Sacred,
+One of the benefits: we can use many ready-made dashboards for Sacred,
 e.g.  [Omniboard](https://github.com/vivekratnavel/omniboard) - highly recommended, works out of the box, 
 many impressive features. 
 
 
-##### Structuring a project
+## Possible access points, usage modes
+### CLI
 TODO
-##### Possible access points
-###### CLI
-TODO
-###### Task queue + workers
+### Run queue + workers
 Start workers on 1 or more nodes, set them up to use the same database (which is also the task queue).
 Workers are specific to one project - will only process tasks for the project they were started for.
 
@@ -131,7 +154,7 @@ q.submit(task_name, conf)
 The code above works with the project: https://github.com/tpietruszka/ulmfit_attention. 
 In this case workers should be ran from within the inner `ulmfit_attention` directory.
 
-###### Interactive prototyping in Jupyter
+### Interactive prototyping in Jupyter
 TODO 
-###### Running tests
+### Running tests
 TODO
