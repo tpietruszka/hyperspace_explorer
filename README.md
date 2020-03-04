@@ -77,15 +77,14 @@ It should be possible to:
 
 ### Glossary
 - `Run` - single execution of a `Task` with a specific config (set of parameters), concluded by calculation
-of a quality metric (one or more). \
-Example: training a classifier with the hyper-parameters provided in the config, calculating AUROC/accuracy/...
-on the validation set. \
-Each run gets its entry - including parameters, code versions, result metrics, additional meta-information -\
-in the MongoDB database, `runs` collection.
+of a quality metric.\
+Example: training a classifier with the hyper-parameters provided in the config, calculating accuracy
+on the validation set.\
+Each run gets its entry in a selected MongoDB database, in the `runs` collection. It includes
+all parameters, code versions, result metrics, captured output, and possibly custom diagnostic information.
 - `Task` - fully specified problem to solve, and then compare different solutions to. \
-Consists of a chosen 
-`Scenario` and some parameters passed to it - e.g. which dataset to use, how big a sample of a training set
-to use, etc. Each task should be specified as a .json file.
+Consists of a chosen `Scenario` and some parameters passed to it - e.g. which dataset to use.
+Each task should be specified as a .json file.
 - `Scenario` - template of a `Task` without its parameters. When parameterized by `Task` parameters
 and a `Run` config it can be executed, and should return a quality metric. Each `Scenario` is a class,
 inheriting from `scenario_base.Scenario`. Its `.single_run()` method typically contains dataset construction, 
