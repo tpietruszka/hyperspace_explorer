@@ -44,8 +44,8 @@ def single_run(to_run: QueuedRun, observer: observers.RunObserver):
             del task['seed']
         all_params = dict(**_config, **task)
         scenario = scenarios.Scenario.from_config(task['Scenario'])
+        scenario.setup_sacred(_run)
         res = scenario.single_run(all_params)
-        _run.info = res[1]
         return res[0]
 
     run_res = ex.run()
