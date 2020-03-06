@@ -84,8 +84,9 @@ on the validation set.\
 Each run gets its entry in a selected MongoDB database, in the `runs` collection. It includes
 all parameters, code versions, result metrics, captured output, and possibly custom diagnostic information.
 - `Task` - fully specified problem to solve, and then compare different solutions to. \
-Consists of a chosen `Scenario` and some parameters passed to it - e.g. which dataset to use.
-Each task should be specified as a .json file.
+Consists of a chosen `Scenario` class and parameter values for its constructor.
+Each task should be specified as a .json file and include keys: `Scenario`
+(= dictionary of its settings, starting with `className`) and optionally `seed`.
 - `Scenario` - template of a `Task` without its parameters. When parameterized by `Task` parameters
 and a `Run` config it can be executed, and should return a quality metric. Each `Scenario` is a class,
 inheriting from `scenario_base.Scenario`. Its `.single_run()` method typically contains dataset construction, 

@@ -40,12 +40,9 @@ def single_run(to_run: QueuedRun, observer: observers.RunObserver):
     def ex_main(_config, _run):
         #  task desc should always stay effectively the same, but logging as resource just in case
         task = json.load(ex.open_resource(to_run.task_description_file, 'r'))
-        if 'seed' in task.keys():  # already set when setting config
-            del task['seed']
-        all_params = dict(**_config, **task)
         scenario = scenarios.Scenario.from_config(task['Scenario'])
         scenario.setup_sacred(_run)
-        res = scenario.single_run(all_params)
+        res = scenario.single_run(_config)
         return res[0]
 
     run_res = ex.run()
