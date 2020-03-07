@@ -14,6 +14,11 @@ setup(name="hyperspace_explorer",
           'pymongo>=3.9.0'
       ],
       tests_require=[
-            'pytest',
+          'pytest',
       ],
+      extras_require={
+          'dev': [
+              'commitizen>=1.16.4',
+          ],
+      }
       )
