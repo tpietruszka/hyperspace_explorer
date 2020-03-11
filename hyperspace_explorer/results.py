@@ -1,3 +1,4 @@
+import copy
 from typing import *
 import pymongo
 
@@ -46,21 +47,34 @@ class Task:
             del params["seed"]
         return params
 
-    def fetch_results(self, query: Optional[Dict] = None) -> List[Dict]:
-        # TODO: add order setting
-        # TODO: add an option to add custom columns (from metrics, info, others?)
+    def fetch_results(
+        self,
+        query: Optional[Dict] = None,
+        projection_extra: Optional[Dict] = None,
+        order: Optional[List[Tuple]] = None,
+        limit: int = 0,
+    ) -> List[Dict]:
+        """
+        Fetches results of completed runs.
+
+        :param query: MongoDB-style dict of conditions, e.g. {'key.nestedKey': 'val'}
+        :param projection_extra: MongoDB-style dict of {'feat_name': 1} or similar
+        :param order: each tuple is e.g. ('feat_name', pymongo.ASCENDING)
+        :param limit: how many to fetch, 0 - fetch all
+        :return: list of dicts, each dict representing a run
+        """
         if query is None:
             query = {}
+        projection = copy.copy(PROJECTION_RESULTS)
+        if projection_extra:
+            projection.update(projection_extra)
+        if order is None:
+            order = ORDER_RESULT_DESCENDING
+
         runs = self.find_runs(
-            query,
-            completed_only=True,
-            sort=ORDER_RESULT_DESCENDING,
-            projection=PROJECTION_RESULTS,
+            query, completed_only=True, sort=order, projection=projection, limit=limit
         )
         return runs
-
-    def compare_best(self):
-        pass  # TODO: implement
 
     def find_runs(
         self, query: Dict, completed_only: bool = True, **kwargs
