@@ -16,7 +16,7 @@ def process_queue(tasks_dir: Path, db_name: str, mongo_uri: str, sleep_time: int
     while True:
         t = q.fetch_one()
         if t is None:
-            print("No availale tasks in the queue. Sleeping.")
+            print("No available tasks in the queue. Sleeping.")
             time.sleep(sleep_time)
             continue
         try:
