@@ -4,7 +4,7 @@ from copy import copy, deepcopy
 import dataclasses
 
 factories = {}
-CLASS_NAME_FIELD = 'className'
+CLASS_NAME_FIELD = "className"
 
 
 class RegisteredAbstractMeta(ABCMeta):
@@ -27,7 +27,7 @@ class RegisteredAbstractMeta(ABCMeta):
 
     def __new__(mcs, name, bases, class_dct, **kwargs):
         x = super().__new__(mcs, name, bases, class_dct)
-        if kwargs.get('is_registry', False):
+        if kwargs.get("is_registry", False):
             x.subclass_registry = {}
             x.factory = lambda cname, params: x.subclass_registry[cname](**params)
             if name in factories.keys():
@@ -46,7 +46,6 @@ class Configurable(ABC):
     a partial config
     """
 
-
     @classmethod
     @abstractmethod
     def get_default_config(cls) -> Dict:
@@ -54,11 +53,11 @@ class Configurable(ABC):
 
     @classmethod
     @abstractmethod
-    def factory(cls, cname, params) -> 'Configurable':
+    def factory(cls, cname, params) -> "Configurable":
         pass
 
     @classmethod
-    def from_config(cls, params) -> 'Configurable':
+    def from_config(cls, params) -> "Configurable":
         params = deepcopy(params)
         cname = params[CLASS_NAME_FIELD]
         del params[CLASS_NAME_FIELD]
@@ -94,7 +93,7 @@ def fill_in_defaults(params: Dict, factory_name: Optional[str] = None) -> Dict:
         for k, v in defaults.items():
             if k not in params.keys():
                 params[k] = v
-                print(f'Setting {k}={v}')
+                print(f"Setting {k}={v}")
     for k, v in params.items():
         if isinstance(v, Dict) and CLASS_NAME_FIELD in v.keys():
             params[k] = fill_in_defaults(v, k)
@@ -121,7 +120,10 @@ def update_config(c1: Dict, c2: Dict) -> Dict:
             if k not in c1.keys():
                 c1[k] = v
             else:
-                if CLASS_NAME_FIELD not in v.keys() or c1[k][CLASS_NAME_FIELD] == v[CLASS_NAME_FIELD]:
+                if (
+                    CLASS_NAME_FIELD not in v.keys()
+                    or c1[k][CLASS_NAME_FIELD] == v[CLASS_NAME_FIELD]
+                ):
                     c1[k] = update_config(c1[k], v)
                 else:  # c2 sets a different subclass - replacing the config completely
                     c1[k] = v

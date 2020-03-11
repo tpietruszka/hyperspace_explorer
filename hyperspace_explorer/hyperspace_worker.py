@@ -32,15 +32,16 @@ def single_run(to_run: QueuedRun, observer: observers.RunObserver):
     ex = Experiment(to_run.task_name, interactive=True)
     ex.observers.append(observer)
     ex.add_config(params)
-    task_rnd_seed = json.load(to_run.task_description_file.open()).get('seed', None)
-    if task_rnd_seed is not None:  # needs to be set before run to make sense with sacred
-        ex.add_config({'seed': task_rnd_seed})
+    task_rnd_seed = json.load(to_run.task_description_file.open()).get("seed", None)
+    if task_rnd_seed is not None:
+        # needs to be set before run to make sense with sacred
+        ex.add_config({"seed": task_rnd_seed})
 
     @ex.main
     def ex_main(_config, _run):
         #  task desc should always stay effectively the same, but logging as resource just in case
-        task = json.load(ex.open_resource(to_run.task_description_file, 'r'))
-        scenario = scenarios.Scenario.from_config(task['Scenario'])
+        task = json.load(ex.open_resource(to_run.task_description_file, "r"))
+        scenario = scenarios.Scenario.from_config(task["Scenario"])
         scenario.setup_sacred(_run)
         res = scenario.single_run(_config)
         return res[0]
@@ -50,15 +51,24 @@ def single_run(to_run: QueuedRun, observer: observers.RunObserver):
 
 
 def main():
-    desc = "Run experiments from a MongoDB-based queue. \nShould be ran from a folder containing " \
-           "a `scenarios` module, defining the possible scenarios to run. Concrete tasks - " \
-           "sets of parameters for scenarios - should be defined in json files, in the `tasks_dir` folder"
+    desc = (
+        "Run experiments from a MongoDB-based queue. \nShould be ran from a folder containing "
+        "a `scenarios` module, defining the possible scenarios to run. Concrete tasks - "
+        "sets of parameters for scenarios - should be defined in json files, in the `tasks_dir` folder"
+    )
     parser = argparse.ArgumentParser(description=desc)
-    parser.add_argument('tasks_dir', help='Path to a folder storing task json files, absolute or relative',
-                        type=lambda s: Path(s).resolve())
-    parser.add_argument('db_name', help='MongoDB database name')
-    parser.add_argument('--mongo-uri', help='URI of the MongoDB server instance', default='localhost:27017')
-    parser.add_argument('--sleep-time', type=int, default=30)
+    parser.add_argument(
+        "tasks_dir",
+        help="Path to a folder storing task json files, absolute or relative",
+        type=lambda s: Path(s).resolve(),
+    )
+    parser.add_argument("db_name", help="MongoDB database name")
+    parser.add_argument(
+        "--mongo-uri",
+        help="URI of the MongoDB server instance",
+        default="localhost:27017",
+    )
+    parser.add_argument("--sleep-time", type=int, default=30)
     args = parser.parse_args()
     process_queue(args.tasks_dir, args.db_name, args.mongo_uri, args.sleep_time)
 
@@ -69,9 +79,10 @@ if __name__ == "__main__":
     try:
         import scenarios
     except ImportError as e:
-        print('Failed import of `scenarios.py`. This script should be ran from a directory containing it.')
+        print(
+            "Failed import of `scenarios.py`. This script should be ran from a directory containing it."
+        )
         print(e)
         exit(1)
     sys.path = orig_path
     main()
-
