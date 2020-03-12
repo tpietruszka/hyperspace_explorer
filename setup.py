@@ -19,6 +19,10 @@ setup(name="hyperspace_explorer",
       extras_require={
           'dev': [
               'commitizen>=1.16.4',
+              'pytest',
+          ],
+          'analysis': [
+              'pandas>=1.0.2',
           ],
       }
       )

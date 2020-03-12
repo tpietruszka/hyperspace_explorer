@@ -1,6 +1,14 @@
 import copy
 from typing import *
 import pymongo
+from .utils import (
+    flatten,
+    unique_suffixes,
+    drop_constant_columns,
+    lists_to_tuples,
+    requires_analysis_extra,
+    pd,
+)
 
 RUNS_COLLECTION = "runs"
 MONGO_URI_DEFAULT = "mongodb://localhost:27017"
@@ -75,6 +83,29 @@ class Task:
             query, completed_only=True, sort=order, projection=projection, limit=limit
         )
         return runs
+
+    @staticmethod
+    @requires_analysis_extra
+    def results_comparison(
+        results: List[Dict], hide_const_cols: bool = True
+    ) -> "pd.DataFrame":
+        """
+        Prepares a DataFrame comparing results of runs, given output of `fetch_results()`
+
+        Requires Pandas.
+
+        :param results: results, as returned by `fetch_results()`
+        :param hide_const_cols: hide all columns with only 1 unique value?
+        :return: a DataFrame indexed with run ids, comparing config params and results
+        """
+        df = pd.DataFrame([flatten(r) for r in results])
+        df = df.set_index("_id")
+        df.index.name = "id"
+        df = df.rename(columns=unique_suffixes(df.columns))
+        df = lists_to_tuples(df)
+        if hide_const_cols:
+            df = drop_constant_columns(df)
+        return df
 
     def find_runs(
         self, query: Dict, completed_only: bool = True, **kwargs
