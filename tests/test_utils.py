@@ -27,3 +27,17 @@ def test_unique_suffixes():
         "c.A.1": "1",
     }
     assert unique_suffixes(full) == short
+
+
+def test_drop_constant_columns():
+    df = pd.DataFrame(
+        {
+            "A": [1, 2, 3, 4],
+            "B": [1, 1, 1, 1],
+            "C": [(), (), (), ()],
+            "D": [(), (), (10,), (10,)],
+            "E": [1, 1, None, None],
+        }
+    )
+    r = drop_constant_columns(df)
+    assert set(r.columns) == {"A", "D", "E"}

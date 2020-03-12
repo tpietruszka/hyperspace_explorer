@@ -66,7 +66,7 @@ def requires_analysis_extra(func):
 
 @requires_analysis_extra
 def drop_constant_columns(df: "pd.DataFrame") -> "pd.DataFrame":
-    to_keep = [c for c in df.columns if df[c].nunique() > 1]
+    to_keep = [c for c in df.columns if df[c].nunique(dropna=False) > 1]
     return df[to_keep]
 
 
