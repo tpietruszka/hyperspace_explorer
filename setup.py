@@ -22,7 +22,7 @@ setup(name="hyperspace_explorer",
               'pytest',
           ],
           'analysis': [
-              'pandas>=1.0.2',
+              'pandas>=1.0.1',
           ],
       }
       )
