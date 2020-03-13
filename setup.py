@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(name="hyperspace_explorer",
-      version="0.1.0",
+      version="0.2.0",
       author="Tomasz Pietruszka",
       author_email="tomek.pietruszka@gmail.com",
       description="Tracking, queueing and distributed execution of ML/DL experiments. Helping define and "
