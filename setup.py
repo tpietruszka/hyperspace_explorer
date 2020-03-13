@@ -4,6 +4,7 @@ setup(name="hyperspace_explorer",
       version="0.2.0",
       author="Tomasz Pietruszka",
       author_email="tomek.pietruszka@gmail.com",
+      url="https://github.com/tpietruszka/hyperspace_explorer",
       description="Tracking, queueing and distributed execution of ML/DL experiments. Helping define and "
                   "semi-automatically explore hyper-parameter spaces.",
       packages=find_packages(),
