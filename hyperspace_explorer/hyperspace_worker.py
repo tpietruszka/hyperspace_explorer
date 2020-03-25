@@ -5,9 +5,13 @@ import argparse
 import sys
 import copy
 import json
-from sacred import observers, Experiment
+from sacred import observers, Experiment, settings
 from hyperspace_explorer.queue import RunQueue, QueuedRun
 from hyperspace_explorer.configurables import fill_in_defaults
+
+# because of the way things get imported, the default discovery strategies do not work
+settings.SETTINGS.DISCOVER_SOURCES = "sys"
+settings.SETTINGS.DISCOVER_DEPENDENCIES = "sys"
 
 
 def process_queue(tasks_dir: Path, db_name: str, mongo_uri: str, sleep_time: int):
@@ -29,7 +33,8 @@ def process_queue(tasks_dir: Path, db_name: str, mongo_uri: str, sleep_time: int
 
 def single_run(to_run: QueuedRun, observer: observers.RunObserver):
     params = fill_in_defaults(to_run.params)
-    ex = Experiment(to_run.task_name, interactive=True)
+    base_dir = Path(scenarios.__file__).parent
+    ex = Experiment(to_run.task_name, base_dir=base_dir)
     ex.observers.append(observer)
     ex.add_config(params)
     task_rnd_seed = json.load(to_run.task_description_file.open()).get("seed", None)
