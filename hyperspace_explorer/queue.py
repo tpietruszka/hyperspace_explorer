@@ -27,6 +27,8 @@ class RunQueue:
     params_field = "params"
     status_field = "status"
     status_taken = "TAKEN"
+    status_ready = "READY"
+    status_paused = "PAUSED"
     time_inserted_field = "time_inserted"
     time_taken_field = "time_taken"
 
@@ -52,7 +54,7 @@ class RunQueue:
         available_tasks = self.get_available_tasks()
         query = {
             self.taskname_field: {"$in": available_tasks},
-            self.status_field: {"$ne": self.status_taken},
+            self.status_field: {"$eq": self.status_ready},
         }
         update = {
             "$set": {
@@ -82,6 +84,23 @@ class RunQueue:
                 self.taskname_field: task_name,
                 self.params_field: params,
                 self.time_inserted_field: datetime.datetime.utcnow(),
+                self.status_field: self.status_ready,
             }
         )
         return res.inserted_id
+
+    def pause_all(self) -> int:
+        """Marks all 'ready' tasks in the queue as paused"""
+        res = self.queue.update_many(
+            {self.status_field: self.status_ready},
+            {"$set": {self.status_field: self.status_paused}},
+        )
+        return res.modified_count
+
+    def resume_all(self) -> int:
+        """Marks all 'paused' tasks in the queue as ready"""
+        res = self.queue.update_many(
+            {self.status_field: self.status_paused},
+            {"$set": {self.status_field: self.status_ready}},
+        )
+        return res.modified_count
