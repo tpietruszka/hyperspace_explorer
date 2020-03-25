@@ -1,5 +1,8 @@
 from setuptools import setup, find_packages
 
+with open("README.md", "r") as fh:
+    long_description = fh.read()
+
 setup(name="hyperspace_explorer",
       version="0.2.0",
       author="Tomasz Pietruszka",
@@ -7,6 +10,8 @@ setup(name="hyperspace_explorer",
       url="https://github.com/tpietruszka/hyperspace_explorer",
       description="Tracking, queueing and distributed execution of ML/DL experiments. Helping define and "
                   "semi-automatically explore hyper-parameter spaces.",
+      long_description=long_description,
+      long_description_content_type="text/markdown",
       packages=find_packages(),
       scripts=['hyperspace_explorer/hyperspace_worker.py'],
       python_requires='>=3.7',
@@ -25,5 +30,5 @@ setup(name="hyperspace_explorer",
           'analysis': [
               'pandas>=1.0.1',
           ],
-      }
+      },
       )
