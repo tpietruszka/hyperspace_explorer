@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(name="hyperspace_explorer",
-      version="0.2.0",
+      version="0.3.0",
       author="Tomasz Pietruszka",
       author_email="tomek.pietruszka@gmail.com",
       url="https://github.com/tpietruszka/hyperspace_explorer",
