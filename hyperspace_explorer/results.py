@@ -11,6 +11,7 @@ from .utils import (
 )
 
 RUNS_COLLECTION = "runs"
+METRICS_COLLECTION = "metrics"
 MONGO_URI_DEFAULT = "mongodb://localhost:27017"
 STATUS_COMPLETED = "COMPLETED"
 
@@ -125,3 +126,19 @@ class Task:
     def get_completed_ids(self) -> List[int]:
         runs = self.find_runs({"status": STATUS_COMPLETED}, projection={"_id": 1})
         return [r["_id"] for r in runs]
+
+    def metrics_for_run(
+        self, run_id: int, names: Optional[List[str]] = None
+    ) -> List[Dict]:
+        """
+        Fetches metrics data for a given run, optionally only for specified metric names
+        :param run_id: run id
+        :param names: list of metrics to fetch, fetch all if not specified
+        :return: list of dicts containing keys: name, run_id, steps, timestamps, values
+        """
+        collection = self._client[self.db_name][METRICS_COLLECTION]
+        query = {"run_id": run_id}
+        if names:
+            query["name"] = {"$in": names}
+        cur = collection.find(query)
+        return list(cur)
