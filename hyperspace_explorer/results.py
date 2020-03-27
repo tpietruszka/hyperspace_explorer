@@ -16,8 +16,9 @@ MONGO_URI_DEFAULT = "mongodb://localhost:27017"
 STATUS_COMPLETED = "COMPLETED"
 
 
-PROJECTION_RESULTS = {"config": 1, "result": 1}
-ORDER_RESULT_DESCENDING = [("result", pymongo.DESCENDING)]
+RESULT_FIELD = "result"
+PROJECTION_RESULTS = {"config": 1, RESULT_FIELD: 1}
+ORDER_RESULT_DESCENDING = [(RESULT_FIELD, pymongo.DESCENDING)]
 
 
 class Study:
@@ -41,6 +42,9 @@ class Task:
         self.mongo_uri = mongo_uri
         self._client = pymongo.MongoClient(mongo_uri)
         self.c = self._client[db_name][RUNS_COLLECTION]
+        self.c.create_index(
+            ORDER_RESULT_DESCENDING
+        )  # ensure quick retrieval in default order
 
     def get_run(self, run_id: int) -> Dict:
         run = self.c.find_one(run_id)
