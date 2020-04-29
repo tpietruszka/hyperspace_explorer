@@ -194,6 +194,11 @@ The code above works with the project: https://github.com/tpietruszka/ulmfit_att
 In this case workers should be ran from within the inner `ulmfit_attention` directory.
 
 ### Interactive prototyping in Jupyter
-TODO 
+An [example notebook](https://github.com/tpietruszka/ulmfit_attention/blob/master/notebooks/example_prototyping.ipynb)
+meant for development of a new class fitting within an existing project can be found in the `ulmfit_attention` project.
+
+While somewhat involved in that particular project, it demonstrates how to use `hyperspace_explorer`'s infrastructure
+to quickly create an experiment within a notebook and run it.
+
 ### Running tests
 TODO
